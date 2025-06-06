@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Image } from 'react-native';
 import useAuthViewModel from '../viewmodels/useAuthViewModel.js';
 
 export default function LoginView({ onLoginSuccess, onRegister, onRecover }) {
@@ -18,6 +18,11 @@ export default function LoginView({ onLoginSuccess, onRegister, onRecover }) {
 
   return (
     <View style={styles.container}>
+      {/* Icono de la app */}
+      <Image
+        source={require('../assets/SpentProo.png')} // Cambia el nombre si tu icono es diferente
+        style={styles.icon}
+      />
       <Text style={styles.title}>Iniciar Sesión</Text>
       <TextInput
         style={styles.input}
@@ -46,6 +51,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     backgroundColor: '#fff',
+  },
+  icon: {
+    width: 100,
+    height: 100,
+    alignSelf: 'center',
+    marginBottom: 24,
+    borderRadius: 20,
   },
   title: {
     fontSize: 24,

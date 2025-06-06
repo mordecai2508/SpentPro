@@ -3,29 +3,35 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const STORAGE_KEY = 'categories';
 
 const DEFAULT_CATEGORIES = [
-  { id: 1, name: 'Comida', isCustom: false },
-  { id: 2, name: 'Transporte', isCustom: false },
-  { id: 3, name: 'Salud', isCustom: false },
-  { id: 4, name: 'Salario', isCustom: false },
-  { id: 5, name: 'Entretenimiento', isCustom: false },
-  { id: 6, name: 'Educación', isCustom: false },
-  // Agrega aquí las que desees
+  { id: 1, name: 'Comida', type: 'gasto', isCustom: false },
+  { id: 2, name: 'Transporte', type: 'gasto', isCustom: false },
+  { id: 3, name: 'Salud', type: 'gasto', isCustom: false },
+  { id: 4, name: 'Salario', type: 'ingreso', isCustom: false },
+  { id: 5, name: 'Inversiones', type: 'ingreso', isCustom: false },
+  { id: 6, name: 'Otros pagos', type: 'ingreso', isCustom: false },
 ];
 
 // Obtener todas las categorías
 export async function getCategories() {
   const data = await AsyncStorage.getItem(STORAGE_KEY);
-  if (!data) {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_CATEGORIES));
-    return DEFAULT_CATEGORIES;
-  }
-  const parsed = JSON.parse(data);
+  let parsed = data ? JSON.parse(data) : [];
   // Si el array está vacío, volver a cargar las categorías por defecto
   if (!parsed || parsed.length === 0) {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_CATEGORIES));
     return DEFAULT_CATEGORIES;
   }
-  return parsed;
+  // Fusionar por defecto si alguna falta (por si el usuario nunca las eliminó)
+  const merged = [
+    ...DEFAULT_CATEGORIES.filter(def =>
+      !parsed.some(cat => cat.id === def.id || cat.name === def.name)
+    ),
+    ...parsed
+  ];
+  // Si hubo cambios, actualiza el storage
+  if (merged.length !== parsed.length) {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+  }
+  return merged;
 }
 
 // Agregar una categoría

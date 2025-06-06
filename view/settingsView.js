@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, FlatList, StyleSheet, TextInput, Modal, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import useCategoryViewModel from '../viewmodels/useCategoryViewModel';
 import useGoalViewModel from '../viewmodels/useGoalViewModel';
 
@@ -10,6 +11,7 @@ export default function SettingsView({ onBack }) {
   // Estado para modales de categoría
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [categoryName, setCategoryName] = useState('');
+  const [categoryType, setCategoryType] = useState('gasto');
   const [editingCategory, setEditingCategory] = useState(null);
 
   // Estado para modales de objetivo
@@ -18,6 +20,10 @@ export default function SettingsView({ onBack }) {
   const [goalPeriod, setGoalPeriod] = useState('');
   const [goalProgress, setGoalProgress] = useState('');
   const [editingGoal, setEditingGoal] = useState(null);
+  const [modifyGoalModalVisible, setModifyGoalModalVisible] = useState(false);
+  const [modifyGoalAmount, setModifyGoalAmount] = useState('');
+  const [modifyGoalType, setModifyGoalType] = useState('agregar');
+  const [goalToModify, setGoalToModify] = useState(null);
 
   useEffect(() => {
     loadCategories();
@@ -31,12 +37,13 @@ export default function SettingsView({ onBack }) {
       return;
     }
     if (editingCategory) {
-      await editCategory(editingCategory.id, { name: categoryName, isCustom: true });
+      await editCategory(editingCategory.id, { name: categoryName, type: categoryType, isCustom: true });
     } else {
-      await createCategory({ name: categoryName, isCustom: true });
+      await createCategory({ name: categoryName, type: categoryType, isCustom: true });
     }
     setCategoryModalVisible(false);
     setCategoryName('');
+    setCategoryType('gasto');
     setEditingCategory(null);
   };
 
@@ -77,6 +84,7 @@ export default function SettingsView({ onBack }) {
               onPress={() => {
                 setEditingCategory(item);
                 setCategoryName(item.name);
+                setCategoryType(item.type || 'gasto');
                 setCategoryModalVisible(true);
               }}
             />
@@ -90,6 +98,7 @@ export default function SettingsView({ onBack }) {
         onPress={() => {
           setEditingCategory(null);
           setCategoryName('');
+          setCategoryType('gasto');
           setCategoryModalVisible(true);
         }}
       />
@@ -114,6 +123,15 @@ export default function SettingsView({ onBack }) {
               }}
             />
             <Button title="Eliminar" onPress={() => removeGoal(item.id)} />
+            <Button
+              title="Modificar"
+              onPress={() => {
+                setGoalToModify(item);
+                setModifyGoalAmount('');
+                setModifyGoalType('agregar');
+                setModifyGoalModalVisible(true);
+              }}
+            />
           </View>
         )}
         ListEmptyComponent={<Text>No hay objetivos</Text>}
@@ -144,12 +162,21 @@ export default function SettingsView({ onBack }) {
               value={categoryName}
               onChangeText={setCategoryName}
             />
+            <Picker
+              selectedValue={categoryType}
+              onValueChange={setCategoryType}
+              style={styles.input}
+            >
+              <Picker.Item label="Gasto" value="gasto" />
+              <Picker.Item label="Ingreso" value="ingreso" />
+            </Picker>
             <Button title="Guardar" onPress={handleSaveCategory} />
             <Button
               title="Cancelar"
               onPress={() => {
                 setCategoryModalVisible(false);
                 setCategoryName('');
+                setCategoryType('gasto');
                 setEditingCategory(null);
               }}
             />
@@ -193,6 +220,57 @@ export default function SettingsView({ onBack }) {
                 setGoalPeriod('');
                 setGoalProgress('');
                 setEditingGoal(null);
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal para modificar objetivo */}
+      <Modal visible={modifyGoalModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Modificar Meta</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Cantidad"
+              value={modifyGoalAmount}
+              onChangeText={setModifyGoalAmount}
+              keyboardType="numeric"
+            />
+            <Picker
+              selectedValue={modifyGoalType}
+              onValueChange={setModifyGoalType}
+              style={styles.input}
+            >
+              <Picker.Item label="Agregar" value="agregar" />
+              <Picker.Item label="Retirar" value="retirar" />
+            </Picker>
+            <Button
+              title="Guardar"
+              onPress={async () => {
+                if (!modifyGoalAmount) {
+                  Alert.alert('Error', 'Ingresa una cantidad');
+                  return;
+                }
+                let newProgress = goalToModify.progress || 0;
+                const amount = parseFloat(modifyGoalAmount);
+                if (modifyGoalType === 'agregar') {
+                  newProgress += amount;
+                } else {
+                  newProgress -= amount;
+                  if (newProgress < 0) newProgress = 0;
+                }
+                await editGoal(goalToModify.id, { ...goalToModify, progress: newProgress });
+                setModifyGoalModalVisible(false);
+                setGoalToModify(null);
+              }}
+            />
+            <Button
+              title="Cancelar"
+              onPress={() => {
+                setModifyGoalModalVisible(false);
+                setGoalToModify(null);
               }}
             />
           </View>
