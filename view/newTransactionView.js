@@ -2,18 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import useTransactionViewModel from '../viewmodels/useTransactionViewModel';
 import useCategoryViewModel from '../viewmodels/useCategoryViewModel';
-import { getTransactions } from '../services/transactionService'; // Asegúrate de importar esto
+import { getTransactions } from '../services/transactionService';
 
-export default function NewTransactionView({ onTransactionAdded, onCancel }) {
+export default function NewTransactionView({ userEmail, onTransactionAdded, onCancel }) {
   const [type, setType] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const { createTransaction } = useTransactionViewModel();
+  const { createTransaction, loadTransactions } = useTransactionViewModel(userEmail);
   const { categories, loadCategories } = useCategoryViewModel();
 
   useEffect(() => {

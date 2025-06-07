@@ -5,8 +5,13 @@ import useCategoryViewModel from '../viewmodels/useCategoryViewModel';
 import useGoalViewModel from '../viewmodels/useGoalViewModel';
 
 export default function SettingsView({ onBack }) {
-  const { categories, loadCategories, createCategory, editCategory, removeCategory } = useCategoryViewModel();
+  const { customCategories, loadCustomCategories, createCategory, editCategory, removeCategory } = useCategoryViewModel();
   const { goals, loadGoals, createGoal, editGoal, removeGoal } = useGoalViewModel();
+
+  useEffect(() => {
+    loadCustomCategories();
+    loadGoals();
+  }, []);
 
   // Estado para modales de categoría
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
@@ -24,11 +29,6 @@ export default function SettingsView({ onBack }) {
   const [modifyGoalAmount, setModifyGoalAmount] = useState('');
   const [modifyGoalType, setModifyGoalType] = useState('agregar');
   const [goalToModify, setGoalToModify] = useState(null);
-
-  useEffect(() => {
-    loadCategories();
-    loadGoals();
-  }, []);
 
   // Lógica para agregar/editar categoría
   const handleSaveCategory = async () => {
@@ -74,7 +74,7 @@ export default function SettingsView({ onBack }) {
     <View style={styles.container}>
       <Text style={styles.title}>Configuración de Categorías</Text>
       <FlatList
-        data={categories}
+        data={customCategories}
         keyExtractor={item => item.id?.toString()}
         renderItem={({ item }) => (
           <View style={styles.item}>
@@ -124,7 +124,7 @@ export default function SettingsView({ onBack }) {
             />
             <Button title="Eliminar" onPress={() => removeGoal(item.id)} />
             <Button
-              title="Modificar"
+              title="Progreso"
               onPress={() => {
                 setGoalToModify(item);
                 setModifyGoalAmount('');
@@ -204,13 +204,6 @@ export default function SettingsView({ onBack }) {
               value={goalPeriod}
               onChangeText={setGoalPeriod}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Progreso"
-              value={goalProgress}
-              onChangeText={setGoalProgress}
-              keyboardType="numeric"
-            />
             <Button title="Guardar" onPress={handleSaveGoal} />
             <Button
               title="Cancelar"
@@ -261,7 +254,13 @@ export default function SettingsView({ onBack }) {
                   newProgress -= amount;
                   if (newProgress < 0) newProgress = 0;
                 }
-                await editGoal(goalToModify.id, { ...goalToModify, progress: newProgress });
+                // Si el progreso alcanza o supera la meta, reinicia y felicita
+                if (newProgress >= goalToModify.amount) {
+                  await editGoal(goalToModify.id, { ...goalToModify, progress: 0 });
+                  Alert.alert('¡Felicidades!', '¡Has completado tu objetivo de ahorro! El progreso se ha reiniciado.');
+                } else {
+                  await editGoal(goalToModify.id, { ...goalToModify, progress: newProgress });
+                }
                 setModifyGoalModalVisible(false);
                 setGoalToModify(null);
               }}
