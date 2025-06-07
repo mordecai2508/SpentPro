@@ -8,7 +8,7 @@ export default function RecoverAccountView({ onQuestionReceived }) {
 
   const handleSubmit = async () => {
     if (!username) {
-      Alert.alert('Error', 'Ingresa tu usuario');
+      Alert.alert('Error', 'Ingresa tu correo');
       return;
     }
     const result = await handleRecoverAccount(username);
@@ -24,7 +24,7 @@ export default function RecoverAccountView({ onQuestionReceived }) {
       <Text style={styles.title}>Recuperar Cuenta</Text>
       <TextInput
         style={styles.input}
-        placeholder="Usuario"
+        placeholder="Correo"
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"

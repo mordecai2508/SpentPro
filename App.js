@@ -76,7 +76,7 @@ export default function App() {
     return (
       <View style={styles.container}>
         <SecurityQuestionsView
-          username={recoverUsername}
+          correo={recoverUsername}
           question={securityQuestion}
           onAnswerCorrect={() => setScreen('newPassword')}
         />
@@ -92,13 +92,14 @@ export default function App() {
         <NewPasswordView
           username={recoverUsername}
           onPasswordChanged={() => setScreen('login')}
+          onCancel={() => setScreen('login')}
         />
         <Button title="Regresar" onPress={() => setScreen('login')} />
         <StatusBar style="auto" />
       </View>
     );
   }
-
+ 
   if (screen === 'dashboard') {
     return (
       <View style={styles.container}>

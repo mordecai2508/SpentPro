@@ -4,11 +4,16 @@ import useAuthViewModel from '../viewmodels/useAuthViewModel';
 
 export default function NewPasswordView({ username, onPasswordChanged, onCancel }) {
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const { handleChangePassword } = useAuthViewModel();
 
   const handleSubmit = async () => {
-    if (!newPassword) {
-      Alert.alert('Error', 'Ingresa una nueva contraseña');
+    if (!newPassword || !confirmPassword) {
+      Alert.alert('Error', 'Debes ingresar y confirmar la nueva contraseña');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'Las contraseñas no coinciden');
       return;
     }
     const result = await handleChangePassword(username, newPassword);
@@ -28,6 +33,13 @@ export default function NewPasswordView({ username, onPasswordChanged, onCancel 
         placeholder="Nueva contraseña"
         value={newPassword}
         onChangeText={setNewPassword}
+        secureTextEntry
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirmar contraseña"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
         secureTextEntry
       />
       <Button title="Guardar" onPress={handleSubmit} />

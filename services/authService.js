@@ -58,8 +58,10 @@ export async function validateSecurityAnswer(correo, answer) {
   const users = await getUsers();
   const user = users.find(u => u.correo === correo);
   if (user && user.securityAnswer === answer) {
+    console.log('Respuesta correcta');
     return { success: true };
   }
+  console.log('Respuesta incorrecta');
   return { success: false, message: 'Respuesta incorrecta' };
 }
 

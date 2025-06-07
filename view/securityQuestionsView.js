@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import useAuthViewModel from '../viewmodels/useAuthViewModel';
+import useAuthViewModel from '../viewmodels/useAuthViewModel.js';
 
-export default function SecurityQuestionsView({ username, question, onAnswerCorrect }) {
+export default function SecurityQuestionsView({ correo, question, onAnswerCorrect }) {
   const [answer, setAnswer] = useState('');
   const { validateSecurityAnswer } = useAuthViewModel();
 
@@ -11,9 +11,9 @@ export default function SecurityQuestionsView({ username, question, onAnswerCorr
       Alert.alert('Error', 'Ingresa tu respuesta');
       return;
     }
-    const result = await validateSecurityAnswer(username, answer);
+    const result = await validateSecurityAnswer(correo, answer);
     if (result.success) {
-      onAnswerCorrect && onAnswerCorrect(answer);
+      onAnswerCorrect && onAnswerCorrect(answer); // Esto debe cambiar la pantalla
     } else {
       Alert.alert('Error', 'Respuesta incorrecta');
     }

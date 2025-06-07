@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { login, register, recoverAccount, changePassword } from '../services/authService';
+import { login, register, recoverAccount, changePassword, validateSecurityAnswer } from '../services/authService.js';
 
 export default function useAuthViewModel() {
   const [user, setUser] = useState(null);
@@ -24,6 +24,10 @@ export default function useAuthViewModel() {
     return await changePassword(correo, newPassword);
   }
 
+  async function validateSecurityAnswerVM(correo, answer) {
+    return await validateSecurityAnswer(correo, answer);
+  }
+
   return {
     user,
     error,
@@ -31,5 +35,6 @@ export default function useAuthViewModel() {
     handleRegister,
     handleRecoverAccount,
     handleChangePassword,
+    validateSecurityAnswer: validateSecurityAnswerVM,
   };
 }
